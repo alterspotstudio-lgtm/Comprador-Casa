@@ -530,6 +530,49 @@ function cargarMetaPixel(){
   fbq('init', C.metaPixelId);
   fbq('track', 'PageView');
 }
+
+/* === Metodo Neri · datos de la propiedad desde Airtable (modo ?folio=) === */
+function _neriAplica(d){
+  if(!d) return;
+  if(d.nombre)   C.nombre = d.nombre;
+  if(d.precio)   C.precio = d.precio;
+  if(d.desc)     C.desc   = d.desc;
+  if(d.frase){ EDITAR_PROPIEDAD.FRASE_INICIO=d.frase; var fr=document.getElementById('portadaHeadline')||document.querySelector('.portada-headline,.portada-hero-title'); if(fr) fr.textContent=d.frase; }
+  if(d.portada) C.foto  = d.portada;
+  if(d.ficha)   C.ficha = d.ficha;
+  if(d.folio)   C.folioPropiedad = d.folio;
+  // videos
+  C.videos = C.videos || {};
+  if(d.vSala)     C.videos.sala     = d.vSala;
+  if(d.vCocina)   C.videos.cocina   = d.vCocina;
+  if(d.vRecamara) C.videos.recamara = d.vRecamara;
+  if(d.vJardin)   C.videos.jardin   = d.vJardin;
+  // asesor
+  if(d.asesorNombre) C.asesor = d.asesorNombre;
+  if(d.asesorWhatsapp) C.wa = String(d.asesorWhatsapp).replace(/\D/g,'');
+  var firmaPartes=[]; if(d.asesorNombre) firmaPartes.push(d.asesorNombre);
+  var indep=(d.asesorIndependiente===true||d.asesorIndependiente==='true');
+  if(!indep) firmaPartes.push('Century 21 Haus');
+  if(d.asesorCiudad) firmaPartes.push(d.asesorCiudad);
+  if(firmaPartes.length) C.firma = firmaPartes.join(' \u00B7 ');
+  if(d.pixel) C.metaPixelId = d.pixel;
+  // plusvalia
+  if(d.plusvaliaValor) C.plusvaliaValor = d.plusvaliaValor;
+  if(d.plusvaliaTexto) C.plusvaliaTexto = d.plusvaliaTexto;
+  // foto del asesor en la portada (si existe el elemento)
+  if(d.asesorFoto){ var ap=document.querySelector('.portada-asesor-photo'); if(ap) ap.src=d.asesorFoto; }
+}
+var _neriInitOriginal = initLanding;
+function initLanding(){
+  var folio = new URLSearchParams(location.search).get('folio');
+  if(!folio){ _neriInitOriginal(); return; }   // sin folio => modo manual de siempre
+  fetch("https://hook.us2.make.com/r7y2xb19jdqybqco8ig0b7gtup8qfcvu?folio="+encodeURIComponent(folio))
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d && d.nombre) _neriAplica(d); })
+    .catch(function(e){ console.error('Neri', e); })
+    .then(function(){ _neriInitOriginal(); });   // pinta SIEMPRE, con o sin datos
+}
+
 function initLanding(){
   cargarMetaPixel();
   pintarTextosBase();
