@@ -173,6 +173,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .portada-firma img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:top center;border:1px solid rgba(198,168,107,0.3);flex-shrink:0;}
 .portada-firma-nombre{font-size:11px;font-weight:700;color:var(--white);letter-spacing:0.3px;line-height:1.1;}
 .portada-firma-frase{font-size:8.5px;font-weight:300;color:rgba(198,168,107,0.65);letter-spacing:0.2px;margin-top:2px;font-style:italic;}
+
+
+/* ══ MODO PREMIUM AUTOMÁTICO MÉTODO NERI ══
+   Se activa cuando PRECIO_NUMERICO o PRECIO supera LIMITE_PREMIUM.
+   Protege la percepción premium ocultando crédito popular. */
+body.modo-premium .credito-popular{display:none!important;}
+body.modo-premium .premium-copy{display:block!important;}
+.premium-copy{display:none;}
+
 </style>
 
 </head>
@@ -325,12 +334,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <div style="font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;">Algo que muy pocos explican desde el inicio</div>
       <div style="font-size:11px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.8;">Además del precio existen gastos de cierre de aprox. <strong style="color:rgba(255,255,255,0.75);font-weight:600;">5–8%</strong> — escrituración, notaría, impuestos. Te los integro desde el principio.</div>
     </div>
+    <div class="premium-copy" id="premium-copy-metodo" style="margin-bottom:14px;padding:12px 16px;border-left:2px solid var(--gold);background:rgba(198,168,107,0.035);font-size:10px;font-weight:300;color:rgba(255,255,255,0.46);line-height:1.7;">
+      Por el valor de esta propiedad, la experiencia se ajusta a un perfil patrimonial: recursos propios, crédito bancario o una estrategia combinada de compra.
+    </div>
     <div class="opt-grid2">
       <button class="opt" onclick="pick(4,this,'Con mis propios recursos — compra directa','La compra más limpia y rápida posible.',30)"><div class="opt-dot">✓</div><div><div class="opt-main">Recursos propios</div><div class="opt-sub">Compra directa, sin crédito</div></div></button>
       <button class="opt" onclick="pick(4,this,'Crédito bancario','Con el banco correcto, el proceso es más accesible de lo que parece.',24)"><div class="opt-dot">✓</div><div><div class="opt-main">Crédito bancario</div><div class="opt-sub">Tengo o estoy en proceso de pre-aprobación</div></div></button>
       <button class="opt" onclick="pick(4,this,'Crédito + recursos propios','Una combinación inteligente para optimizar tu liquidez.',27)"><div class="opt-dot">✓</div><div><div class="opt-main">Crédito + enganche propio</div><div class="opt-sub">Complemento con crédito</div></div></button>
-      <button class="opt" id="opt-infonavit" onclick="pick(4,this,'Infonavit','Hay formas inteligentes de maximizar tu crédito Infonavit.',16)" style="display:none;"><div class="opt-dot">✓</div><div><div class="opt-main">Infonavit</div><div class="opt-sub">Quiero aprovechar mis ahorros del fondo</div></div></button>
-      <button class="opt" id="opt-fovissste" onclick="pick(4,this,'Fovissste','El Fovissste tiene esquemas muy accesibles para trabajadores del Estado.',16)" style="display:none;"><div class="opt-dot">✓</div><div><div class="opt-main">Fovissste</div><div class="opt-sub">Soy trabajador del Estado</div></div></button>
+      <button class="opt credito-popular" id="opt-infonavit" onclick="pick(4,this,'Infonavit','Hay formas inteligentes de maximizar tu crédito Infonavit.',16)" style="display:none;"><div class="opt-dot">✓</div><div><div class="opt-main">Infonavit</div><div class="opt-sub">Quiero aprovechar mis ahorros del fondo</div></div></button>
+      <button class="opt credito-popular" id="opt-fovissste" onclick="pick(4,this,'Fovissste','El Fovissste tiene esquemas muy accesibles para trabajadores del Estado.',16)" style="display:none;"><div class="opt-dot">✓</div><div><div class="opt-main">Fovissste</div><div class="opt-sub">Soy trabajador del Estado</div></div></button>
       <button class="opt" onclick="pick(4,this,'Aún lo estoy evaluando','Cuéntame más cuando hablemos — encontramos el esquema correcto juntos.',6)"><div class="opt-dot">✓</div><div><div class="opt-main">Aún lo evalúo</div><div class="opt-sub">Todavía analizando mis opciones</div></div></button>
     </div>
     <div class="reaction" id="r4"></div>
@@ -400,10 +412,6 @@ const EDITAR_PROPIEDAD = {
   PRECIO: "$3,200,000 MXN · Cuernavaca",
   DESCRIPCION: "En Lomas de Ahuatlán, una de las zonas con mayor plusvalía sostenida de Cuernavaca, esta propiedad está lista para habitarse. Sin gestiones pendientes, sin sorpresas. Solo tú y la decisión.",
 
-  // ⚡ FOLIO DE LA PROPIEDAD — pon aquí el folio exacto que tiene en Propiedades NERI
-  // Ejemplo: "CVA-2026-5001" — este folio enlaza todos los leads compradores con la propiedad
-  FOLIO_PROPIEDAD: "CVA-2026-2090",
-
   PORTADA: "https://res.cloudinary.com/db37gqv2s/image/upload/v1778729708/Hailuo_Image_White_modern_two-story_house_with_palm_tree_on_the_left_wide_concrete_patio._Slow_zoom_in._Day_to_n_511164143023353862_pfxz7l.png",
   FICHA_TECNICA: "https://drive.google.com/file/d/1EmoH_9n4yiO-MJPz2CEigWLiyQ2ri6ru/view?usp=sharing",
 
@@ -421,7 +429,8 @@ const EDITAR_PROPIEDAD = {
     { ETIQUETA: "Lectura NERI", VALOR: "Patrimonial", TEXTO: "Esta propiedad debe evaluarse por cómo encaja con tu vida y por su capacidad de conservar valor en el tiempo." }
   ],
 
-  MOSTRAR_PREGUNTA_CREDITO: true,
+  // Opcional: deja null para automático. Usa true/false solo si quieres forzar manualmente.
+  MOSTRAR_PREGUNTA_CREDITO: null,
 
   WEBHOOK_MAKE: "https://hook.us2.make.com/qqsrjs8gtm0sdn7iba8hxmyfnc3m9y8j",
   META_PIXEL_ID: "1308747473990434",
@@ -441,9 +450,35 @@ const EDITAR_PROPIEDAD = {
 // ║   Todo lo demás del archivo NO se toca.                  ║
 // ╚══════════════════════════════════════════════════════════╝
 
+
+function limpiarPrecioNumero(valor){
+  if(typeof valor === 'number' && isFinite(valor)) return valor;
+  var texto = String(valor || '').replace(/[^0-9.]/g,'');
+  var numero = parseFloat(texto);
+  return isFinite(numero) ? numero : 0;
+}
+
+function resolverMostrarCreditoPopular(config){
+  var precio = limpiarPrecioNumero(config.PRECIO_NUMERICO || config.PRECIO);
+  var limite = limpiarPrecioNumero(config.LIMITE_PREMIUM || 4000000);
+  var esPremium = precio >= limite;
+  if(config.MOSTRAR_PREGUNTA_CREDITO === true) return true;
+  if(config.MOSTRAR_PREGUNTA_CREDITO === false) return false;
+  return !esPremium;
+}
+
+function resolverModoPremium(config){
+  var precio = limpiarPrecioNumero(config.PRECIO_NUMERICO || config.PRECIO);
+  var limite = limpiarPrecioNumero(config.LIMITE_PREMIUM || 4000000);
+  return precio >= limite;
+}
+
 var C = {
   nombre: EDITAR_PROPIEDAD.NOMBRE,
   precio: EDITAR_PROPIEDAD.PRECIO,
+  precioNumerico: limpiarPrecioNumero(EDITAR_PROPIEDAD.PRECIO_NUMERICO || EDITAR_PROPIEDAD.PRECIO),
+  limitePremium: limpiarPrecioNumero(EDITAR_PROPIEDAD.LIMITE_PREMIUM || 4000000),
+  esPremium: resolverModoPremium(EDITAR_PROPIEDAD),
   desc: EDITAR_PROPIEDAD.DESCRIPCION,
   foto: EDITAR_PROPIEDAD.PORTADA,
   ficha: EDITAR_PROPIEDAD.FICHA_TECNICA,
@@ -453,10 +488,9 @@ var C = {
   plusvaliaValor: EDITAR_PROPIEDAD.PLUSVALIA_VALOR,
   plusvaliaTexto: EDITAR_PROPIEDAD.PLUSVALIA_TEXTO,
   datosMercado: EDITAR_PROPIEDAD.DATOS_MERCADO || [],
-  mostrar_credito: !!EDITAR_PROPIEDAD.MOSTRAR_PREGUNTA_CREDITO,
+  mostrar_credito: resolverMostrarCreditoPopular(EDITAR_PROPIEDAD),
   webhook: EDITAR_PROPIEDAD.WEBHOOK_MAKE,
   metaPixelId: EDITAR_PROPIEDAD.META_PIXEL_ID,
-  folioPropiedad: EDITAR_PROPIEDAD.FOLIO_PROPIEDAD || '',
   videos: {
     sala: EDITAR_PROPIEDAD.VIDEO_SALA,
     cocina: EDITAR_PROPIEDAD.VIDEO_COCINA,
@@ -513,9 +547,9 @@ function initVideos(){
   if(tw && !any) tw.style.display='none';
 }
 function aplicarModoCredito(){
-  // El step-4 (pregunta de forma de pago) siempre se muestra para mantener
-  // el flujo del diagnóstico. Solo se ocultan las opciones de crédito social
-  // (Infonavit / Fovissste) cuando la propiedad es premium.
+  // El step-4 siempre se muestra. La landing detecta automáticamente si la
+  // propiedad es premium por precio y oculta crédito popular sin romper Make/Airtable.
+  document.body.classList.toggle('modo-premium', !!C.esPremium);
   var el1=document.getElementById('opt-infonavit');
   var el2=document.getElementById('opt-fovissste');
   if(el1) el1.style.display = C.mostrar_credito ? '' : 'none';
@@ -530,49 +564,6 @@ function cargarMetaPixel(){
   fbq('init', C.metaPixelId);
   fbq('track', 'PageView');
 }
-
-/* === Metodo Neri · datos de la propiedad desde Airtable (modo ?folio=) === */
-function _neriAplica(d){
-  if(!d) return;
-  if(d.nombre)   C.nombre = d.nombre;
-  if(d.precio)   C.precio = d.precio;
-  if(d.desc)     C.desc   = d.desc;
-  if(d.frase){ EDITAR_PROPIEDAD.FRASE_INICIO=d.frase; var fr=document.getElementById('portadaHeadline')||document.querySelector('.portada-headline,.portada-hero-title'); if(fr) fr.textContent=d.frase; }
-  if(d.portada) C.foto  = d.portada;
-  if(d.ficha)   C.ficha = d.ficha;
-  if(d.folio)   C.folioPropiedad = d.folio;
-  // videos
-  C.videos = C.videos || {};
-  if(d.vSala)     C.videos.sala     = d.vSala;
-  if(d.vCocina)   C.videos.cocina   = d.vCocina;
-  if(d.vRecamara) C.videos.recamara = d.vRecamara;
-  if(d.vJardin)   C.videos.jardin   = d.vJardin;
-  // asesor
-  if(d.asesorNombre) C.asesor = d.asesorNombre;
-  if(d.asesorWhatsapp) C.wa = String(d.asesorWhatsapp).replace(/\D/g,'');
-  var firmaPartes=[]; if(d.asesorNombre) firmaPartes.push(d.asesorNombre);
-  var indep=(d.asesorIndependiente===true||d.asesorIndependiente==='true');
-  if(!indep) firmaPartes.push('Century 21 Haus');
-  if(d.asesorCiudad) firmaPartes.push(d.asesorCiudad);
-  if(firmaPartes.length) C.firma = firmaPartes.join(' \u00B7 ');
-  if(d.pixel) C.metaPixelId = d.pixel;
-  // plusvalia
-  if(d.plusvaliaValor) C.plusvaliaValor = d.plusvaliaValor;
-  if(d.plusvaliaTexto) C.plusvaliaTexto = d.plusvaliaTexto;
-  // foto del asesor en la portada (si existe el elemento)
-  if(d.asesorFoto){ var ap=document.querySelector('.portada-asesor-photo'); if(ap) ap.src=d.asesorFoto; }
-}
-var _neriInitOriginal = initLanding;
-function initLanding(){
-  var folio = new URLSearchParams(location.search).get('folio');
-  if(!folio){ _neriInitOriginal(); return; }   // sin folio => modo manual de siempre
-  fetch("https://hook.us2.make.com/r7y2xb19jdqybqco8ig0b7gtup8qfcvu?folio="+encodeURIComponent(folio))
-    .then(function(r){return r.json();})
-    .then(function(d){ if(d && d.nombre) _neriAplica(d); })
-    .catch(function(e){ console.error('Neri', e); })
-    .then(function(){ _neriInitOriginal(); });   // pinta SIEMPRE, con o sin datos
-}
-
 function initLanding(){
   cargarMetaPixel();
   pintarTextosBase();
@@ -581,7 +572,96 @@ function initLanding(){
   aplicarModoCredito();
   setTimeout(function(){ updDemanda(0); }, 250);
 }
-if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', initLanding); } else { initLanding(); }
+// ╔══════════════════════════════════════════════════════════╗
+// ║   MÉTODO NERI — CONEXIÓN AUTOMÁTICA POR ?folio=          ║
+// ║   Lee el folio de la URL, consulta la propiedad en Make  ║
+// ║   y rellena SOLO los datos que vengan llenos.            ║
+// ║   Si no hay folio o falla la red, usa el modo manual.    ║
+// ║   No toca el pixel ni el webhook del formulario.         ║
+// ╚══════════════════════════════════════════════════════════╝
+var WEBHOOK_PROPIEDAD = "https://hook.us2.make.com/r7y2xb19jdqybqco8ig0b7gtup8qfcvu";
+
+function _neriTieneValor(v){
+  if(v === null || v === undefined) return false;
+  var s = String(v).trim();
+  if(s === '') return false;
+  if(s.toLowerCase() === 'undefined' || s.toLowerCase() === 'null') return false;
+  return true;
+}
+
+function _neriLeerFolio(){
+  try{
+    var p = new URLSearchParams(window.location.search);
+    var f = p.get('folio');
+    return _neriTieneValor(f) ? f.trim() : '';
+  }catch(e){ return ''; }
+}
+
+function _neriAplicarDatos(d){
+  if(!d || typeof d !== 'object') return;
+
+  if(_neriTieneValor(d.nombre)) C.nombre = String(d.nombre).trim();
+  if(_neriTieneValor(d.desc))   C.desc   = String(d.desc).trim();
+  if(_neriTieneValor(d.portada))C.foto   = String(d.portada).trim();
+  if(_neriTieneValor(d.ficha))  C.ficha  = String(d.ficha).trim();
+  if(_neriTieneValor(d.plusvaliaValor)) C.plusvaliaValor = String(d.plusvaliaValor).trim();
+  if(_neriTieneValor(d.plusvaliaTexto)) C.plusvaliaTexto = String(d.plusvaliaTexto).trim();
+
+  // Precio: si llega, recalculamos número, modo premium y crédito.
+  if(_neriTieneValor(d.precio)){
+    C.precio = String(d.precio).trim();
+    C.precioNumerico = limpiarPrecioNumero(C.precio);
+    C.esPremium = C.precioNumerico >= C.limitePremium;
+    if(EDITAR_PROPIEDAD.MOSTRAR_PREGUNTA_CREDITO === true)       C.mostrar_credito = true;
+    else if(EDITAR_PROPIEDAD.MOSTRAR_PREGUNTA_CREDITO === false) C.mostrar_credito = false;
+    else                                                         C.mostrar_credito = !C.esPremium;
+  }
+
+  // Videos del tour
+  if(_neriTieneValor(d.vSala))     C.videos.sala     = String(d.vSala).trim();
+  if(_neriTieneValor(d.vCocina))   C.videos.cocina   = String(d.vCocina).trim();
+  if(_neriTieneValor(d.vRecamara)) C.videos.recamara = String(d.vRecamara).trim();
+  if(_neriTieneValor(d.vJardin))   C.videos.jardin   = String(d.vJardin).trim();
+
+  // Asesor
+  if(_neriTieneValor(d.asesorNombre))   C.asesor = String(d.asesorNombre).trim();
+  if(_neriTieneValor(d.asesorWhatsapp)) C.wa     = String(d.asesorWhatsapp).replace(/[^0-9]/g,'');
+  if(_neriTieneValor(d.asesorNombre)){
+    C.firma = _neriTieneValor(d.asesorCiudad)
+      ? (String(d.asesorNombre).trim() + ' · ' + String(d.asesorCiudad).trim())
+      : String(d.asesorNombre).trim();
+  }
+}
+
+function aplicarFolioRemoto(callback){
+  var hecho = false;
+  function seguir(){ if(hecho) return; hecho = true; try{ callback(); }catch(e){} }
+
+  var folio = _neriLeerFolio();
+  if(!folio){ seguir(); return; }            // Sin folio → modo manual
+
+  // Red de seguridad: si la red tarda demasiado, pintamos igual.
+  var guarda = setTimeout(seguir, 6000);
+
+  try{
+    fetch(WEBHOOK_PROPIEDAD + '?folio=' + encodeURIComponent(folio), {
+      method: 'GET',
+      cache: 'no-store'
+    })
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      try{
+        var data = JSON.parse(txt);
+        _neriAplicarDatos(data);
+      }catch(e){ /* respuesta vacía o no-JSON → conserva manual */ }
+      clearTimeout(guarda); seguir();
+    })
+    .catch(function(){ clearTimeout(guarda); seguir(); });
+  }catch(e){ clearTimeout(guarda); seguir(); }
+}
+
+function bootNeri(){ aplicarFolioRemoto(function(){ initLanding(); }); }
+if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bootNeri); } else { bootNeri(); }
 
 // State
 var ans={}, pts={}, step=0, TOTAL=4;
@@ -764,8 +844,7 @@ function classify(s){
 
 function goVideos(){
   _score=calcScore(); _cls=classify(_score);
-  // Folio: FOLIO_PROPIEDAD + número de lead comprador (rastreable por propiedad)
-  if(!_folio) _folio=(C.folioPropiedad||'CVA')+'-C'+String(Math.floor(Math.random()*900)+100);
+  _folio='ENB-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
   show('propiedad');
   setTimeout(function(){
     var tw=document.getElementById('tourWrap');
@@ -793,8 +872,7 @@ function openFicha(){
 
 function goConv(){
   _score=calcScore(); _cls=classify(_score);
-  // Mantiene el mismo folio ya generado en goVideos (no genera uno nuevo)
-  if(!_folio) _folio=(C.folioPropiedad||'CVA')+'-C'+String(Math.floor(Math.random()*900)+100);
+  _folio='ENB-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
   var sv=document.getElementById('convScore'), cv=document.getElementById('convCls');
   sv.textContent=_score+' / 100 pts'; sv.className='conv-score '+_cls.toLowerCase();
   cv.textContent='Perfil '+_cls; cv.className='conv-cls '+_cls.toLowerCase();
@@ -826,8 +904,7 @@ function sendZap(){
   formData.append('asesor',      C.asesor || '');
   formData.append('score',       String(sc));
   formData.append('clasificacion', classify(sc));
-  formData.append('folio',           _folio);
-  formData.append('folio_propiedad', C.folioPropiedad || '');
+  formData.append('folio',       _folio);
   formData.append('lead_status', classify(sc));
   formData.append('estado',      'Lead Nuevo');
   formData.append('fuente',      'Experiencia Privada Web');
