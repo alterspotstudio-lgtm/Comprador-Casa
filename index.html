@@ -377,7 +377,7 @@ body.modo-premium .premium-copy{display:block!important;}
   <div class="prop-cta">
     <p class="prop-cta-pre">"El siguiente paso no es ver la casa.<br>Es entender si encaja con tu vida."</p>
     <button class="btn-gold" onclick="goConv()">Quiero conocerla →</button>
-    <button class="btn-ghost" onclick="goWA()">Hablar con Enrique ahora</button>
+    <button class="btn-ghost" id="btnHablarAsesor" onclick="goWA()">Hablar con Enrique ahora</button>
   </div>
 </div>
 
@@ -622,6 +622,7 @@ function _neriAplicarDatos(d){
   if(_neriTieneValor(d.vCocina))   C.videos.cocina   = String(d.vCocina).trim();
   if(_neriTieneValor(d.vRecamara)) C.videos.recamara = String(d.vRecamara).trim();
   if(_neriTieneValor(d.vJardin))   C.videos.jardin   = String(d.vJardin).trim();
+  if(_neriTieneValor(d.vAlberca))  C.videos.alberca  = String(d.vAlberca).trim();
 
   // Asesor
   if(_neriTieneValor(d.asesorNombre))   C.asesor = String(d.asesorNombre).trim();
@@ -633,6 +634,8 @@ function _neriAplicarDatos(d){
       : String(d.asesorNombre).trim();
     var elNombre = document.getElementById('portadaAsesorNombre');
     if(elNombre) elNombre.textContent = String(d.asesorNombre).trim();
+    var elBtnWA = document.getElementById('btnHablarAsesor');
+    if(elBtnWA) elBtnWA.textContent = 'Hablar con ' + String(d.asesorNombre).trim() + ' ahora';
   }
   if(_neriTieneValor(d.asesorFrase)){
     var elFrase = document.getElementById('portadaAsesorFrase');
