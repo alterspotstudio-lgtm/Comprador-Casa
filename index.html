@@ -107,7 +107,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .tour-area{margin-bottom:20px;}
 .tour-area-name{font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:8px;}
 .tour-video{position:relative;width:100%;max-width:360px;margin:0 auto;padding-top:177.78%;background:rgba(255,255,255,0.02);border:1px solid rgba(198,168,107,0.1);overflow:hidden;}
-.tour-video iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.tour-video iframe,.tour-video video{position:absolute;inset:0;width:100%;height:100%;border:none;background:#000;}
+.tour-video video{object-fit:cover;}
 
 /* PROP CTA */
 .prop-cta{padding:28px 28px 52px;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:480px;margin:0 auto;}
@@ -334,9 +335,6 @@ body.modo-premium .premium-copy{display:block!important;}
       <div style="font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;">Algo que muy pocos explican desde el inicio</div>
       <div style="font-size:11px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.8;">Además del precio existen gastos de cierre de aprox. <strong style="color:rgba(255,255,255,0.75);font-weight:600;">5–8%</strong> — escrituración, notaría, impuestos. Te los integro desde el principio.</div>
     </div>
-    <div class="premium-copy" id="premium-copy-metodo" style="margin-bottom:14px;padding:12px 16px;border-left:2px solid var(--gold);background:rgba(198,168,107,0.035);font-size:10px;font-weight:300;color:rgba(255,255,255,0.46);line-height:1.7;">
-      Por el valor de esta propiedad, la experiencia se ajusta a un perfil patrimonial: recursos propios, crédito bancario o una estrategia combinada de compra.
-    </div>
     <div class="opt-grid2">
       <button class="opt" onclick="pick(4,this,'Con mis propios recursos — compra directa','La compra más limpia y rápida posible.',30)"><div class="opt-dot">✓</div><div><div class="opt-main">Recursos propios</div><div class="opt-sub">Compra directa, sin crédito</div></div></button>
       <button class="opt" onclick="pick(4,this,'Crédito bancario','Con el banco correcto, el proceso es más accesible de lo que parece.',24)"><div class="opt-dot">✓</div><div><div class="opt-main">Crédito bancario</div><div class="opt-sub">Tengo o estoy en proceso de pre-aprobación</div></div></button>
@@ -560,27 +558,101 @@ function pintarTextosBase(){
   var firma=document.querySelector('.conv-neri'); if(firma) firma.textContent=C.firma || C.asesor || 'Asesor responsable';
   var propFichaEl=document.getElementById('propFicha'); if(propFichaEl && C.ficha) propFichaEl.href=C.ficha;
 }
+var __videosTourPreparados = false;
+
+function _valorVideoAirtable(v){
+  if(!v) return '';
+  if(Array.isArray(v)) return _valorVideoAirtable(v[0]);
+  if(typeof v === 'object'){
+    return v.url || v.URL || v.downloadUrl || v.downloadURL || v.link || v.href || '';
+  }
+  return String(v || '').trim();
+}
+
+function _youtubeEmbed(url){
+  var s = String(url || '').trim();
+  if(!s) return '';
+  if(/^[a-zA-Z0-9_-]{8,}$/.test(s) && s.indexOf('http') !== 0 && s.indexOf('.') < 0) return 'https://www.youtube.com/embed/'+s+'?rel=0&modestbranding=1&playsinline=1';
+  var m = s.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+  return m ? 'https://www.youtube.com/embed/'+m[1]+'?rel=0&modestbranding=1&playsinline=1' : '';
+}
+
+function _vimeoEmbed(url){
+  var s = String(url || '').trim();
+  var m = s.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+  return m ? 'https://player.vimeo.com/video/'+m[1] : '';
+}
+
+function _esVideoDirecto(url){
+  return /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(String(url || '')) || /airtableusercontent\.com|dl\.airtable\.com/i.test(String(url || ''));
+}
+
+function _crearPlayer(url){
+  var src = _valorVideoAirtable(url);
+  if(!src) return null;
+
+  var yt = _youtubeEmbed(src);
+  if(yt){
+    var iframe = document.createElement('iframe');
+    iframe.src = yt;
+    iframe.allowFullscreen = true;
+    iframe.loading = 'lazy';
+    iframe.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+    return iframe;
+  }
+
+  var vm = _vimeoEmbed(src);
+  if(vm){
+    var vf = document.createElement('iframe');
+    vf.src = vm;
+    vf.allowFullscreen = true;
+    vf.loading = 'lazy';
+    vf.setAttribute('allow','autoplay; fullscreen; picture-in-picture');
+    return vf;
+  }
+
+  if(_esVideoDirecto(src) || src.indexOf('http') === 0){
+    var video = document.createElement('video');
+    video.src = src;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = 'metadata';
+    return video;
+  }
+  return null;
+}
+
 function initVideos(){
-  function setV(area, ytId, nombre){
-    if(!ytId) return;
+  var any = !!(C.videos.sala||C.videos.cocina||C.videos.recamara||C.videos.jardin||C.videos.alberca||(C.videos.extra&&C.videos.extra.id));
+  var tw = document.getElementById('tourWrap');
+  if(tw) tw.style.display = any ? 'block' : 'none';
+  __videosTourPreparados = false;
+}
+
+function pintarVideosTour(){
+  if(__videosTourPreparados) return;
+  __videosTourPreparados = true;
+
+  function setV(area, valor, nombre){
+    var src = _valorVideoAirtable(valor);
+    if(!src) return;
     var t = document.getElementById('t-'+area);
-    var v = document.getElementById('v-'+area);
-    if(!t||!v) return;
+    var box = t ? t.querySelector('.tour-video') : null;
+    if(!t || !box) return;
+    var player = _crearPlayer(src);
+    if(!player) return;
+    box.innerHTML = '';
+    box.appendChild(player);
     t.style.display = 'block';
-    if(!v.src || v.src === window.location.href){
-      v.src = 'https://www.youtube.com/embed/'+ytId+'?rel=0&modestbranding=1';
-    }
     if(nombre){ var n=document.getElementById('t-'+area+'-name'); if(n) n.textContent=nombre; }
   }
+
   setV('sala',     C.videos.sala);
   setV('cocina',   C.videos.cocina);
   setV('recamara', C.videos.recamara);
   setV('jardin',   C.videos.jardin);
   setV('alberca',  C.videos.alberca);
   if(C.videos.extra && C.videos.extra.id) setV('extra', C.videos.extra.id, C.videos.extra.nombre);
-  var any = C.videos.sala||C.videos.cocina||C.videos.recamara||C.videos.jardin||C.videos.alberca||(C.videos.extra&&C.videos.extra.id);
-  var tw = document.getElementById('tourWrap');
-  if(tw && !any) tw.style.display='none';
 }
 function aplicarModoCredito(){
   // El step-4 siempre se muestra. La landing detecta automáticamente si la
@@ -663,12 +735,29 @@ function _neriAplicarDatos(d){
     else                                                         C.mostrar_credito = !C.esPremium;
   }
 
-  // Videos del tour
-  if(_neriTieneValor(d.vSala))     C.videos.sala     = String(d.vSala).trim();
-  if(_neriTieneValor(d.vCocina))   C.videos.cocina   = String(d.vCocina).trim();
-  if(_neriTieneValor(d.vRecamara)) C.videos.recamara = String(d.vRecamara).trim();
-  if(_neriTieneValor(d.vJardin))   C.videos.jardin   = String(d.vJardin).trim();
-  if(_neriTieneValor(d.vAlberca))  C.videos.alberca  = String(d.vAlberca).trim();
+  // Videos del tour: acepta URLs, IDs de YouTube/Vimeo o archivos adjuntos de Airtable.
+  function _tomarVideo(){
+    for(var i=0;i<arguments.length;i++){
+      var v = arguments[i];
+      if(_neriTieneValor(v)) return _valorVideoAirtable(v);
+    }
+    return '';
+  }
+  var vidSala     = _tomarVideo(d.vSala, d.videoSala, d['Video Sala'], d.video_sala);
+  var vidCocina   = _tomarVideo(d.vCocina, d.videoCocina, d['Video Cocina'], d.video_cocina);
+  var vidRecamara = _tomarVideo(d.vRecamara, d.videoRecamara, d.videoRecámara, d['Video Recámara'], d['Video Recamara'], d.video_recamara);
+  var vidJardin   = _tomarVideo(d.vJardin, d.videoJardin, d['Video Jardín'], d['Video Jardin'], d.video_jardin);
+  var vidAlberca  = _tomarVideo(d.vAlberca, d.videoAlberca, d['Video Alberca'], d.video_alberca);
+  var vidExtra    = _tomarVideo(d.vExtra, d.videoExtra, d['Video Extra'], d.video_extra, d.videoExtraUrl);
+  var nomExtra    = d.videoExtraNombre || d.nombreVideoExtra || d['Nombre Video Extra'];
+
+  if(_neriTieneValor(vidSala))     C.videos.sala     = vidSala;
+  if(_neriTieneValor(vidCocina))   C.videos.cocina   = vidCocina;
+  if(_neriTieneValor(vidRecamara)) C.videos.recamara = vidRecamara;
+  if(_neriTieneValor(vidJardin))   C.videos.jardin   = vidJardin;
+  if(_neriTieneValor(vidAlberca))  C.videos.alberca  = vidAlberca;
+  if(_neriTieneValor(vidExtra))    C.videos.extra.id = vidExtra;
+  if(_neriTieneValor(nomExtra))    C.videos.extra.nombre = String(nomExtra).trim();
 
   // Asesor: no usa foto ni nombre quemado. Solo pinta lo que llegue desde Airtable/Make.
   var asesorNombre = d.asesorNombre || d.asesor || d.nombreAsesor;
@@ -726,6 +815,7 @@ var prospectTelefono="";
 function show(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.getElementById('screen-'+id).classList.add('active');
+  if(id === 'propiedad') pintarVideosTour();
   window.scrollTo(0,0);
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   var tab = document.getElementById('tab-'+id);
