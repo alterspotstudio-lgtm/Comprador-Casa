@@ -159,6 +159,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .portada-asesor-title{font-size:8px;font-weight:300;color:rgba(198,168,107,0.6);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
 
 /* ── PORTADA HEADLINE ── */
+.portada-frase-prop{font-family:"Montserrat",sans-serif;font-size:12px;font-weight:300;font-style:italic;letter-spacing:1px;color:var(--gold);text-align:center;margin:6px 0 14px;opacity:0.85;}
 .portada-headline{font-family:"Bebas Neue",sans-serif;font-size:clamp(32px,9vw,48px);line-height:0.95;letter-spacing:2px;color:var(--white);text-align:center;margin-bottom:10px;}
 .portada-headline .line-gold{color:var(--gold);display:block;}
 .portada-interes{font-size:10px;font-weight:400;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:6px;letter-spacing:0.3px;}
@@ -213,6 +214,8 @@ body.modo-premium .premium-copy{display:block!important;}
         ANTES DE VER<br>
         LA PROPIEDAD, <span class="gold">ENTIÉNDELA.</span>
       </div>
+
+      <div class="portada-frase-prop" id="portadaFraseProp" style="display:none;"></div>
 
       <div class="portada-interes" style="margin-bottom:20px;"><span id="portadaIntroTexto">Este acceso fue preparado para ti. Un diagnóstico honesto.</span></div>
 
@@ -407,6 +410,7 @@ body.modo-premium .premium-copy{display:block!important;}
 
 const EDITAR_PROPIEDAD = {
   NOMBRE: "Propiedad privada",
+  FRASE_PORTADA: "",
   PRECIO: "Precio por confirmar",
   DESCRIPCION: "Información preparada para entender la propiedad, su valor y el siguiente paso con mayor claridad.",
 
@@ -477,6 +481,7 @@ function resolverModoPremium(config){
 
 var C = {
   nombre: EDITAR_PROPIEDAD.NOMBRE,
+  frasePortada: EDITAR_PROPIEDAD.FRASE_PORTADA || "",
   precio: EDITAR_PROPIEDAD.PRECIO,
   precioNumerico: limpiarPrecioNumero(EDITAR_PROPIEDAD.PRECIO_NUMERICO || EDITAR_PROPIEDAD.PRECIO),
   limitePremium: limpiarPrecioNumero(EDITAR_PROPIEDAD.LIMITE_PREMIUM || 4000000),
@@ -553,6 +558,8 @@ function pintarIdentidad(){
   if(btnPortada) btnPortada.textContent='Hablar con '+(C.asesor||'el asesor');
 }
 function pintarTextosBase(){
+  var fraseProp=document.getElementById('portadaFraseProp');
+  if(fraseProp){ if(C.frasePortada){ fraseProp.textContent=C.frasePortada; fraseProp.style.display='block'; } else { fraseProp.style.display='none'; } }
   var propNombre=document.getElementById('propNombre'); if(propNombre) propNombre.textContent=C.nombre;
   var propPrecio=document.getElementById('propPrecio'); if(propPrecio) propPrecio.textContent=C.precio;
   var propDesc=document.getElementById('propDesc'); if(propDesc) propDesc.textContent=C.desc;
@@ -713,6 +720,7 @@ function _neriAplicarDatos(d){
 
   // Propiedad: acepta nombres normalizados desde Make y algunos alias seguros.
   if(_neriTieneValor(d.nombre || d.nombrePropiedad)) C.nombre = String(d.nombre || d.nombrePropiedad).trim();
+  if(_neriTieneValor(d.frasePortada || d.fraseportada || d.portadaFrase || d.tagline || d['Frase Portada'])) C.frasePortada = String(d.frasePortada || d.fraseportada || d.portadaFrase || d.tagline || d['Frase Portada']).trim();
   if(_neriTieneValor(d.desc || d.descripcion))       C.desc   = String(d.desc || d.descripcion).trim();
   if(_neriTieneValor(d.portada || d.fotoPortada))    C.foto   = String(d.portada || d.fotoPortada).trim();
   if(_neriTieneValor(d.ficha || d.fichaTecnica))     C.ficha  = String(d.ficha || d.fichaTecnica).trim();
