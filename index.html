@@ -251,7 +251,7 @@ body.modo-premium .premium-copy{display:block!important;}
 <div style="margin-bottom:24px;"></div>
 
       <button class="btn-gold" onclick="show('diagnostico')">Iniciar mi diagnóstico →</button>
-      <button class="btn-ghost" onclick="goWA()">Hablar con el asesor</button>
+      <button class="btn-ghost" id="btnHablarAsesorPortada" onclick="goWA()">Hablar con el asesor</button>
     </div>
   </div>
 </div>
@@ -549,6 +549,8 @@ function pintarIdentidad(){
   }
   var botones=document.querySelectorAll('#btnHablarAsesor');
   botones.forEach(function(b){ b.textContent='Hablar con '+(C.asesor||'el asesor')+' ahora'; });
+  var btnPortada=document.getElementById('btnHablarAsesorPortada');
+  if(btnPortada) btnPortada.textContent='Hablar con '+(C.asesor||'el asesor');
 }
 function pintarTextosBase(){
   var propNombre=document.getElementById('propNombre'); if(propNombre) propNombre.textContent=C.nombre;
