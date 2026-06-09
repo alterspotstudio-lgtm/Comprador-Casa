@@ -602,7 +602,7 @@ function _esVideoIdrive(url){
 }
 
 function _srcVideoPrivado(src){
-  var endpoint = window.NERI_IDRIVE_READ_API || '/api/idrive-read-url';
+  var endpoint = window.NERI_IDRIVE_READ_API || 'https://intranetmetodonerierealtor.vercel.app/api/idrive-read-url';
   return endpoint + '?url=' + encodeURIComponent(src);
 }
 
