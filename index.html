@@ -596,6 +596,16 @@ function _esVideoDirecto(url){
   return /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(String(url || '')) || /airtableusercontent\.com|dl\.airtable\.com/i.test(String(url || ''));
 }
 
+function _esVideoIdrive(url){
+  var s = String(url || '');
+  return /idrivee2\.com/i.test(s) || /\/metodo-neri\//i.test(s);
+}
+
+function _srcVideoPrivado(src){
+  var endpoint = window.NERI_IDRIVE_READ_API || '/api/idrive-read-url';
+  return endpoint + '?url=' + encodeURIComponent(src);
+}
+
 function _crearPlayer(url){
   var src = _valorVideoAirtable(url);
   if(!src) return null;
@@ -622,7 +632,7 @@ function _crearPlayer(url){
 
   if(_esVideoDirecto(src) || src.indexOf('http') === 0){
     var video = document.createElement('video');
-    video.src = src;
+    video.src = _esVideoIdrive(src) ? _srcVideoPrivado(src) : src;
     video.controls = true;
     video.playsInline = true;
     video.preload = 'metadata';
