@@ -341,7 +341,7 @@ body.modo-premium .premium-copy{display:block!important;}
     <div class="opt-grid2">
       <button class="opt" onclick="pick(4,this,'Con mis propios recursos — compra directa','La compra más limpia y rápida posible.',30)"><div class="opt-dot">✓</div><div><div class="opt-main">Recursos propios</div><div class="opt-sub">Compra directa, sin crédito</div></div></button>
       <button class="opt" onclick="pick(4,this,'Crédito bancario','Con el banco correcto, el proceso es más accesible de lo que parece.',24)"><div class="opt-dot">✓</div><div><div class="opt-main">Crédito bancario</div><div class="opt-sub">Tengo o estoy en proceso de pre-aprobación</div></div></button>
-      <button class="opt" onclick="pick(4,this,'Crédito + recursos propios','Una combinación inteligente para optimizar tu liquidez.',27)"><div class="opt-dot">✓</div><div><div class="opt-main">Crédito + enganche propio</div><div class="opt-sub">Complemento con crédito</div></div></button>
+      <button class="opt" onclick="pick(4,this,'Crédito + recursos propios','Una combinación inteligente para optimizar tu liquidez.',27)"><div class="opt-dot">✓</div><div><div class="opt-main">Crédito + recursos propios</div><div class="opt-sub">Complemento con crédito</div></div></button>
       <button class="opt credito-popular" id="opt-infonavit" onclick="pick(4,this,'Infonavit','Hay formas inteligentes de maximizar tu crédito Infonavit.',16)" style="display:none;"><div class="opt-dot">✓</div><div><div class="opt-main">Infonavit</div><div class="opt-sub">Quiero aprovechar mis ahorros del fondo</div></div></button>
       <button class="opt credito-popular" id="opt-fovissste" onclick="pick(4,this,'Fovissste','El Fovissste tiene esquemas muy accesibles para trabajadores del Estado.',16)" style="display:none;"><div class="opt-dot">✓</div><div><div class="opt-main">Fovissste</div><div class="opt-sub">Soy trabajador del Estado</div></div></button>
       <button class="opt" onclick="pick(4,this,'Aún lo estoy evaluando','Cuéntame más cuando hablemos — encontramos el esquema correcto juntos.',6)"><div class="opt-dot">✓</div><div><div class="opt-main">Aún lo evalúo</div><div class="opt-sub">Todavía analizando mis opciones</div></div></button>
@@ -395,7 +395,7 @@ body.modo-premium .premium-copy{display:block!important;}
     <div class="conv-title">Todo está listo.</div>
     <p class="conv-body">Con base en lo que me contaste, esta propiedad tiene mucho en común con lo que estás buscando.<br><br>El siguiente paso es vivirla. Coordinar una visita privada donde puedas sentir los espacios, aclarar tus dudas y tomar una decisión desde la claridad — no desde la presión.</p>
     <button class="conv-cta" onclick="agendarWA()">Consultar días y horarios disponibles →</button>
-    <button class="conv-wa" onclick="openFicha()">Descargar Ficha Técnica PDF ↓</button>
+    <button class="conv-wa" id="btnFichaTecnica" onclick="openFicha()">Ver ficha técnica completa →</button>
     <div class="conv-neri">Asesor responsable</div>
   </div>
 </div>
@@ -526,6 +526,33 @@ function pintarPortada(){
   }else if(img){
     img.src=C.foto; img.style.display='block';
   }
+}
+/* PORTADA EN LA MISMA CALIDAD QUE LA FICHA TECNICA
+   Make manda una miniatura del adjunto: en la portada, que ocupa casi toda la
+   pantalla, esa miniatura se estira y se ve pixeleada. La ficha tecnica no
+   tiene ese problema porque lee el adjunto en su tamano original a traves del
+   propio servidor del intranet. La misma casa no puede verse bien en una liga
+   y rota en la otra. Aqui se pide esa misma imagen y se reemplaza la de Make.
+   Si falla, se queda la de Make: la portada nunca se rompe por esto. */
+function portadaResolucionCompleta(){
+  var folio = _neriLeerFolio();
+  if(!folio) return;
+  try{
+    fetch('https://intranetmetodonerirealtor.vercel.app/api/propiedad-activa?folio=' + encodeURIComponent(folio), { method:'GET' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d || !d.fotoPortada || d.fotoPortada === C.foto) return;
+        C.foto = d.fotoPortada;
+        var cont = document.getElementById('portadaPhoto');
+        var img  = document.getElementById('portadaImg');
+        if(!cont) return;
+        var vOld = cont.querySelector('video');
+        if(vOld) vOld.parentNode.removeChild(vOld);
+        if(img){ img.style.display='none'; img.removeAttribute('src'); }
+        pintarPortada();
+      })
+      .catch(function(){ /* se queda la portada que mando Make */ });
+  }catch(e){ }
 }
 function iconoCasaIndependiente(){
   var s="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#C6A86B' stroke-width='1.5'><path d='M3 11l9-7 9 7'/><path d='M5 10v9h14v-9'/></svg>";
@@ -686,6 +713,8 @@ function initLanding(){
   pintarTextosBase();
   pintarIdentidad();
   pintarPortada();
+  portadaResolucionCompleta();
+  ajustarBotonFicha();
   initVideos();
   aplicarModoCredito();
   setTimeout(function(){ updDemanda(0); }, 250);
@@ -885,9 +914,15 @@ function toggleOtro(){
 }
 
 function moveSlider(v){
-  document.getElementById('sliderNum').textContent = v;
+  /* El slider salio del HTML pero esta llamada se quedo. Reventaba en cada
+     carga y, al reventar, todo lo que venia despues en el script dejaba de
+     ejecutarse sin aviso. Ahora si los elementos no estan, no pasa nada. */
+  var num = document.getElementById('sliderNum');
+  if(num) num.textContent = v;
+  var input = document.getElementById('sliderInput');
+  if(!input) return;
   var pct = ((v-1)/9*100);
-  document.getElementById('sliderInput').style.background =
+  input.style.background =
     'linear-gradient(90deg,var(--gold) '+pct+'%,rgba(255,255,255,0.08) '+pct+'%)';
 }
 moveSlider(5);
@@ -1007,8 +1042,16 @@ function goVideos(){
   }, 80);
 }
 
+/* La ficha tecnica ya vive en el intranet. Este boton no hacia nada porque
+   esperaba un PDF que nadie sube: C.ficha llega vacio y la funcion salia en
+   silencio. El cliente tocaba y no pasaba nada, que desgasta mas que no tener
+   boton. Si no hay PDF cargado, se abre la ficha real por folio. */
+function fichaNeriUrl(){
+  var folio = _neriLeerFolio();
+  return folio ? ('https://intranetmetodonerirealtor.vercel.app/ficha.html?folio=' + encodeURIComponent(folio)) : '';
+}
 function getFichaUrl(){
-  if(!C.ficha) return '';
+  if(!C.ficha) return fichaNeriUrl();
   var url = C.ficha.trim();
   // Google Drive: convierte enlaces compartidos a descarga directa cuando detecta el ID del archivo.
   var driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
@@ -1022,7 +1065,12 @@ function getFichaUrl(){
 }
 function openFicha(){
   var fichaUrl = getFichaUrl();
-  if(fichaUrl){ window.open(fichaUrl, '_blank'); }
+  if(fichaUrl){ window.open(fichaUrl, '_blank', 'noopener'); }
+}
+/* Un boton que no lleva a ningun lado desgasta mas que su ausencia. */
+function ajustarBotonFicha(){
+  var b = document.getElementById('btnFichaTecnica');
+  if(b) b.style.display = getFichaUrl() ? '' : 'none';
 }
 
 function goConv(){
