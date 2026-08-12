@@ -1028,8 +1028,14 @@ function calcScore(){
   return Math.min(100, Math.max(0, t));
 }
 function classify(s){
-  // COLD: curioso o sin claridad financiera. WARM: intención real pero necesita madurar. HOT: listo para visita/seguimiento inmediato.
+  // La clasificación operativa permanece intacta para CRM y seguimiento.
   return s>=75?'HOT':s>=45?'WARM':'COLD';
+}
+function clasificacionParaCliente(c){
+  // El cliente recibe orientación útil, no etiquetas internas de prospección.
+  if(c==='HOT') return {score:'Coincidencia destacada',perfil:'Tu perfil está listo para avanzar'};
+  if(c==='WARM') return {score:'Coincidencia favorable',perfil:'Hay buenas condiciones para continuar'};
+  return {score:'Exploración inicial',perfil:'Vamos a definir contigo la mejor ruta'};
 }
 
 function goVideos(){
@@ -1077,8 +1083,9 @@ function goConv(){
   _score=calcScore(); _cls=classify(_score);
   _folio='ENB-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
   var sv=document.getElementById('convScore'), cv=document.getElementById('convCls');
-  sv.textContent=_score+' / 100 pts'; sv.className='conv-score '+_cls.toLowerCase();
-  cv.textContent='Perfil '+_cls; cv.className='conv-cls '+_cls.toLowerCase();
+  var publico=clasificacionParaCliente(_cls);
+  sv.textContent=publico.score; sv.className='conv-score '+_cls.toLowerCase();
+  cv.textContent=publico.perfil; cv.className='conv-cls '+_cls.toLowerCase();
   show('conversion');
 }
 
